@@ -1,24 +1,26 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
-
-# Add your action's branding here. This will appear on the GitHub Marketplace.
+name: 'Dotnet Compat Checker'
+description: 'Checks the ABI compatibility between two .NET assemblies.'
+author: 'wolfcomp'
 branding:
-  icon: 'heart'
-  color: 'red'
-
-# Define your inputs here.
+    icon: 'activity'
+    color: 'blue'
 inputs:
-  milliseconds:
-    description: 'Your input description here'
-    required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
-
+    left:
+        description: 'The path to the left assembly.'
+        required: true
+    right:
+        description: 'The path to the right assembly.'
+        required: true
+    token:
+        description: 'The GitHub token to use for the check.'
+        default: ${{ github.token }}
+        required: false
+    tag:
+        description:
+            'The tag(s) to add to the pull request if check fails. Comma
+            separated.'
+        default: ''
+        required: false
 runs:
-  using: node20
-  main: dist/index.js
+    using: node20
+    main: dist/index.js

@@ -27,9 +27,7 @@ export async function run(): Promise<void> {
 
         const result = await compat(left, right)
 
-        if (
-            result !==
-            'APICompat ran successfully without finding any breaking changes.'
+        if (!!result && result !== 'APICompat ran successfully without finding any breaking changes.'
         ) {
             // parse out the results to find out what the breaking changes are
             const breakingChanges = parse(result)
@@ -69,6 +67,10 @@ export async function run(): Promise<void> {
         }
     } catch (error) {
         // Fail the workflow run if an error occurs
-        if (error instanceof Error) core.setFailed(error.message)
+        if (error instanceof Error) {
+            core.setFailed(error.message)
+            if (error.stack)
+                core.error(error.stack)
+        }
     }
 }

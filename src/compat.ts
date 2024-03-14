@@ -40,7 +40,7 @@ export async function execPromise(command: string): Promise<string> {
     core.info(stdout)
 
     if (stderr) {
-        throw new ExecError('Error executing command', stderr, stdout)
+        return stderr
     }
     return stdout
 }

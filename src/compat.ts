@@ -33,7 +33,7 @@ export async function execPromise(command: string): Promise<string> {
     core.info('stderr:')
     core.info(stderr)
 
-    if (stderr) {
+    if (stderr !== '') {
         return stderr
     }
     return stdout

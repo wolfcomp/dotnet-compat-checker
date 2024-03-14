@@ -30,10 +30,12 @@ export async function run(): Promise<void> {
         if (
             !!result &&
             result !==
-                'APICompat ran successfully without finding any breaking changes.'
+            'APICompat ran successfully without finding any breaking changes.'
         ) {
             // parse out the results to find out what the breaking changes are
             const breakingChanges = parse(result)
+            if (breakingChanges.length === 0)
+                return;
             const mappedChanges = breakingChanges.reduce(
                 (acc, change) => {
                     acc[change.type] = acc[change.type] || []

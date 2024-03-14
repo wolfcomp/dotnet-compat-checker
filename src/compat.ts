@@ -6,9 +6,7 @@ export default async function compat(
     right: string
 ): Promise<string> {
     core.info('Installing .NET API Compat Tool...')
-    await execPromise(
-        `dotnet tool install -g Microsoft.DotNet.ApiCompat.Tool`
-    )
+    await execPromise(`dotnet tool install -g Microsoft.DotNet.ApiCompat.Tool`)
     core.info('Running .NET API Compat Tool...')
     const result = await execPromise(`apicompat -l ${left} -r ${right}`)
     core.info('API Compatibility Result:')
@@ -39,16 +37,4 @@ export async function execPromise(command: string): Promise<string> {
         return stderr
     }
     return stdout
-}
-
-class ExecError extends Error {
-    err: string
-    out: string
-
-    constructor(message: string, err: string, out: string) {
-        super(message)
-        this.err = err
-        this.out = out
-        this.name = 'ExecError'
-    }
 }

@@ -30236,51 +30236,37 @@ exports.execPromise = void 0;
 const exec_1 = __nccwpck_require__(1514);
 const core = __importStar(__nccwpck_require__(2186));
 async function compat(left, right) {
-    try {
-        core.info('Installing .NET API Compat Tool...');
-        await execPromise(`dotnet tool install -g Microsoft.DotNet.ApiCompat.Tool`);
-        core.info('Running .NET API Compat Tool...');
-        const result = await execPromise(`apicompat -l ${left} -r ${right}`);
-        core.info('API Compatibility Result:');
-        return result;
-    }
-    catch (error) {
-        let message = 'An error occurred while running the .NET API Compat Tool.\n';
-        message += error.err;
-        throw new Error(message);
-    }
+    core.info('Installing .NET API Compat Tool...');
+    await execPromise(`dotnet tool install -g Microsoft.DotNet.ApiCompat.Tool`);
+    core.info('Running .NET API Compat Tool...');
+    const result = await execPromise(`apicompat -l ${left} -r ${right}`);
+    core.info('API Compatibility Result:');
+    return result;
 }
 exports["default"] = compat;
+let stdout = '';
+let stderr = '';
+const options = {};
+options.listeners = {
+    stdout: (data) => {
+        stdout += data.toString();
+    },
+    stderr: (data) => {
+        stderr += data.toString();
+    }
+};
 async function execPromise(command) {
-    let stdout = '';
-    let stderr = '';
-    const options = {};
-    options.listeners = {
-        stdout: (data) => {
-            stdout += data.toString();
-        },
-        stderr: (data) => {
-            stderr += data.toString();
-        }
-    };
     await (0, exec_1.exec)(command, undefined, options);
+    core.info('stdout:');
     core.info(stdout);
+    core.info('stderr:');
+    core.info(stderr);
     if (stderr) {
-        throw new ExecError('Error executing command', stderr, stdout);
+        return stderr;
     }
     return stdout;
 }
 exports.execPromise = execPromise;
-class ExecError extends Error {
-    err;
-    out;
-    constructor(message, err, out) {
-        super(message);
-        this.err = err;
-        this.out = out;
-        this.name = 'ExecError';
-    }
-}
 
 
 /***/ }),
@@ -30340,8 +30326,9 @@ async function run() {
             throw new Error('Both left and right inputs must be provided.');
         }
         const result = await (0, compat_1.default)(left, right);
-        if (result !==
-            'APICompat ran successfully without finding any breaking changes.') {
+        if (!!result &&
+            result !==
+                'APICompat ran successfully without finding any breaking changes.') {
             // parse out the results to find out what the breaking changes are
             const breakingChanges = (0, parse_1.default)(result);
             const mappedChanges = breakingChanges.reduce((acc, change) => {
@@ -30374,8 +30361,11 @@ async function run() {
     }
     catch (error) {
         // Fail the workflow run if an error occurs
-        if (error instanceof Error)
+        if (error instanceof Error) {
             core.setFailed(error.message);
+            if (error.stack)
+                core.error(error.stack);
+        }
     }
 }
 exports.run = run;
